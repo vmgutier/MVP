@@ -36,6 +36,18 @@
     .bottom-nav-button.inactive {
       color: rgb(156, 163, 175);
     }
+    
+    .task-item {
+      transition: all 0.3s ease;
+    }
+    
+    .task-item.completed {
+      text-decoration: line-through;
+    }
+    
+    .checkbox {
+      transition: all 0.2s ease;
+    }
   </style>
 </head>
 <body class="bg-stone-50">
@@ -50,6 +62,8 @@
       const [reflection, setReflection] = useState('');
       const [showSuccess, setShowSuccess] = useState(false);
       const [userName] = useState('Alex');
+      const [agendaItems, setAgendaItems] = useState([]);
+      const [agendaInput, setAgendaInput] = useState('');
 
       const moods = [
         { id: 'great', label: 'Great', emoji: '😄', color: 'bg-emerald-100' },
@@ -58,6 +72,25 @@
         { id: 'struggling', label: 'Struggling', emoji: '😟', color: 'bg-yellow-100' },
         { id: 'hard', label: 'Hard Day', emoji: '😔', color: 'bg-orange-100' }
       ];
+
+      const addAgendaItem = () => {
+        if (agendaInput.trim()) {
+          setAgendaItems([...agendaItems, { id: Date.now(), text: agendaInput, completed: false }]);
+          setAgendaInput('');
+        }
+      };
+
+      const toggleAgendaItem = (id) => {
+        setAgendaItems(agendaItems.map(item =>
+          item.id === id ? { ...item, completed: !item.completed } : item
+        ));
+      };
+
+      const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+          addAgendaItem();
+        }
+      };
 
       const handleSubmit = () => {
         if (selectedMood) {
@@ -158,14 +191,75 @@
               </div>
             )}
 
-            {/* Agenda Screen - Coming Soon */}
+            {/* Agenda Screen - Clear Your Mind */}
             {currentTab === 'agenda' && (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center px-6">
-                  <div className="text-6xl mb-4">📅</div>
-                  <h2 className="text-2xl font-semibold text-gray-800 mb-2">Agenda</h2>
-                  <p className="text-gray-500">Coming soon. Your schedule and tasks will appear here.</p>
+              <div className="px-6 py-8">
+                {/* Header */}
+                <div className="mb-8 text-center">
+                  <h1 className="text-3xl font-semibold text-gray-800 mb-2">
+                    Clear Your Mind
+                  </h1>
+                  <p className="text-gray-500 text-sm">Organize your thoughts and tasks</p>
                 </div>
+
+                {/* Input Section */}
+                <div className="mb-8">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={agendaInput}
+                      onChange={(e) => setAgendaInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Add a task or thought..."
+                      className="flex-1 px-4 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent placeholder-gray-400 text-gray-700"
+                    />
+                    <button
+                      onClick={addAgendaItem}
+                      className="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl flex items-center justify-center font-semibold transition-all shadow-md hover:shadow-lg"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tasks List */}
+                {agendaItems.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-5xl mb-4">📝</div>
+                    <p className="text-gray-500">No tasks yet. Add one to get started!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {agendaItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-gray-100"
+                      >
+                        <button
+                          onClick={() => toggleAgendaItem(item.id)}
+                          className={`checkbox flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                            item.completed
+                              ? 'bg-emerald-500 border-emerald-500'
+                              : 'border-gray-300 hover:border-emerald-400'
+                          }`}
+                        >
+                          {item.completed && (
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </button>
+                        <span
+                          className={`task-item flex-1 text-gray-800 ${
+                            item.completed ? 'completed text-gray-400' : ''
+                          }`}
+                        >
+                          {item.text}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
