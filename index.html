@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pulse - Mental Health Support</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    }
+    
+    .mood-button {
+      transition: all 0.3s ease;
+    }
+    
+    .mood-button:hover {
+      transform: scale(1.08);
+    }
+    
+    .mood-button.selected {
+      box-shadow: 0 0 0 3px rgba(167, 243, 208, 0.5);
+    }
+    
+    .bottom-nav-button {
+      transition: all 0.2s ease;
+    }
+    
+    .bottom-nav-button.active {
+      color: rgb(16, 185, 129);
+    }
+    
+    .bottom-nav-button.inactive {
+      color: rgb(156, 163, 175);
+    }
+  </style>
+</head>
+<body class="bg-stone-50">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    function Pulse() {
+      const [currentTab, setCurrentTab] = useState('checkin');
+      const [selectedMood, setSelectedMood] = useState(null);
+      const [reflection, setReflection] = useState('');
+      const [showSuccess, setShowSuccess] = useState(false);
+      const [userName] = useState('Alex');
+
+      const moods = [
+        { id: 'great', label: 'Great', emoji: '😄', color: 'bg-emerald-100' },
+        { id: 'good', label: 'Good', emoji: '🙂', color: 'bg-green-100' },
+        { id: 'okay', label: 'Okay', emoji: '😐', color: 'bg-blue-100' },
+        { id: 'struggling', label: 'Struggling', emoji: '😟', color: 'bg-yellow-100' },
+        { id: 'hard', label: 'Hard Day', emoji: '😔', color: 'bg-orange-100' }
+      ];
+
+      const handleSubmit = () => {
+        if (selectedMood) {
+          setShowSuccess(true);
+          setTimeout(() => {
+            setShowSuccess(false);
+            setSelectedMood(null);
+            setReflection('');
+          }, 3000);
+        }
+      };
+
+      const handleTabChange = (tab) => {
+        if (tab !== 'checkin') {
+          setCurrentTab(tab);
+        } else {
+          setShowSuccess(false);
+          setCurrentTab(tab);
+        }
+      };
+
+      return (
+        <div className="flex flex-col h-screen bg-stone-50 overflow-hidden">
+          {/* Main Content */}
+          <div className="flex-1 overflow-y-auto pb-24">
+            {/* Check-in Screen */}
+            {currentTab === 'checkin' && (
+              <div className="px-6 py-8">
+                {/* Header */}
+                <div className="mb-12 text-center">
+                  <h1 className="text-3xl font-semibold text-gray-800 mb-2">
+                    How are you feeling today, <span className="text-emerald-600">{userName}</span>?
+                  </h1>
+                  <p className="text-gray-500 text-sm">Your check-in helps us support you better</p>
+                </div>
+
+                {/* Success Card */}
+                {showSuccess && (
+                  <div className="mb-8 p-6 bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl border border-emerald-200">
+                    <div className="text-center">
+                      <div className="text-4xl mb-3">✓</div>
+                      <h2 className="text-xl font-semibold text-emerald-700 mb-2">Report Shared</h2>
+                      <p className="text-emerald-600 text-sm">Your counselor has been notified and will reach out soon.</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Form Content */}
+                {!showSuccess && (
+                  <>
+                    {/* Mood Selector */}
+                    <div className="mb-10">
+                      <label className="block text-sm font-medium text-gray-700 mb-4">Select your mood</label>
+                      <div className="grid grid-cols-5 gap-3">
+                        {moods.map((mood) => (
+                          <button
+                            key={mood.id}
+                            onClick={() => setSelectedMood(mood.id)}
+                            className={`mood-button flex flex-col items-center justify-center p-6 rounded-2xl transition-all ${
+                              selectedMood === mood.id
+                                ? `${mood.color} ring-2 ring-emerald-400 scale-105`
+                                : 'bg-gray-100 hover:bg-gray-200'
+                            }`}
+                          >
+                            <span className="text-3xl mb-1">{mood.emoji}</span>
+                            <span className="text-xs font-medium text-gray-700 text-center leading-tight">{mood.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Reflection Box */}
+                    <div className="mb-8">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">Your thoughts</label>
+                      <textarea
+                        value={reflection}
+                        onChange={(e) => setReflection(e.target.value)}
+                        placeholder="What's on your mind? (Optional)"
+                        className="w-full p-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent resize-none placeholder-gray-400 text-gray-700"
+                        rows="5"
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <button
+                      onClick={handleSubmit}
+                      disabled={!selectedMood}
+                      className={`w-full py-3 rounded-2xl font-semibold transition-all ${
+                        selectedMood
+                          ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md hover:shadow-lg'
+                          : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                      }`}
+                    >
+                      Submit Check-in
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Agenda Screen - Coming Soon */}
+            {currentTab === 'agenda' && (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center px-6">
+                  <div className="text-6xl mb-4">📅</div>
+                  <h2 className="text-2xl font-semibold text-gray-800 mb-2">Agenda</h2>
+                  <p className="text-gray-500">Coming soon. Your schedule and tasks will appear here.</p>
+                </div>
+              </div>
+            )}
+
+            {/* Counselor Screen - Coming Soon */}
+            {currentTab === 'counselor' && (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center px-6">
+                  <div className="text-6xl mb-4">💬</div>
+                  <h2 className="text-2xl font-semibold text-gray-800 mb-2">Counselor</h2>
+                  <p className="text-gray-500">Coming soon. Connect with your counselor here.</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Navigation Bar */}
+          <div className="fixed bottom-0 left-0 right-0 bg-stone-50 border-t border-gray-100 shadow-lg">
+            <div className="flex justify-around items-center h-20 max-w-md mx-auto w-full px-4">
+              <button
+                onClick={() => handleTabChange('checkin')}
+                className={`bottom-nav-button flex flex-col items-center justify-center w-16 h-16 rounded-xl transition-all ${
+                  currentTab === 'checkin'
+                    ? 'bg-emerald-50'
+                    : 'hover:bg-gray-50'
+                }`}
+              >
+                <span className="text-2xl mb-1">💚</span>
+                <span className={`text-xs font-medium ${currentTab === 'checkin' ? 'text-emerald-600' : 'text-gray-600'}`}>
+                  Check-in
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleTabChange('agenda')}
+                className={`bottom-nav-button flex flex-col items-center justify-center w-16 h-16 rounded-xl transition-all ${
+                  currentTab === 'agenda'
+                    ? 'bg-emerald-50'
+                    : 'hover:bg-gray-50'
+                }`}
+              >
+                <span className="text-2xl mb-1">📅</span>
+                <span className={`text-xs font-medium ${currentTab === 'agenda' ? 'text-emerald-600' : 'text-gray-600'}`}>
+                  Agenda
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleTabChange('counselor')}
+                className={`bottom-nav-button flex flex-col items-center justify-center w-16 h-16 rounded-xl transition-all ${
+                  currentTab === 'counselor'
+                    ? 'bg-emerald-50'
+                    : 'hover:bg-gray-50'
+                }`}
+              >
+                <span className="text-2xl mb-1">💬</span>
+                <span className={`text-xs font-medium ${currentTab === 'counselor' ? 'text-emerald-600' : 'text-gray-600'}`}>
+                  Counselor
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<Pulse />, document.getElementById('root'));
+  </script>
+</body>
+</html>
